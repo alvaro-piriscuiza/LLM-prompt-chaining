@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 
 from pipeline.models import DecomposedQuestion, SubQuestionAnswer, FinalReport
@@ -9,7 +10,7 @@ endpoint = HuggingFaceEndpoint(
     repo_id="deepseek-ai/DeepSeek-R1",
     task="conversational",
     huggingfacehub_api_token=os.getenv("HF_API_TOKEN"),
-    max_new_tokens=1024,
+    max_new_tokens=4096,
     temperature=0.3,
 )
 llm = ChatHuggingFace(llm=endpoint)
@@ -31,20 +32,16 @@ def parse_json(raw: str, model):
     Extract and validatre a JSON object from a raw LLM response.
 
     LLMs often wrap JSON in markdown fences or prepend explanation text.
-    Slicing from the firs '{' to the lat '}' allows to strip the noise before parsing.
+    The method removes all the texts within the <think>...</think> block.
+    Slicing from the first '{' to the last '}' allows to strip the noise before parsing.
     """
     try:
+        raw = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL)
+        #raw = (raw
+        #       .replace("\u201c", '"').replace("\u201d", '"')
+        #       .replace("\u2018", "'").replace("\u2019", "'"))
         start = raw.index("{")
-        depth = 0
-        end = start
-        for i, char in enumerate(raw[start:], start):
-            if char == "{":
-                depth += 1
-            elif char == "}":
-                depth -= 1
-                if depth == 0:
-                    end = i + 1
-                    break
+        end = raw.rindex("}") + 1
         return model.model_validate(json.loads(raw[start:end]))
     except Exception as e:
         raise ValueError(f"Failed to parse response as {model.__name__}: {e}\nRaw: {raw}")
