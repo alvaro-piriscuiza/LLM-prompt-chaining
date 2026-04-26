@@ -35,7 +35,16 @@ def parse_json(raw: str, model):
     """
     try:
         start = raw.index("{")
-        end = raw.rindex("}") + 1
+        depth = 0
+        end = start
+        for i, char in enumerate(raw[start:], start):
+            if char == "{":
+                depth += 1
+            elif char == "}":
+                depth -= 1
+                if depth == 0:
+                    end = i + 1
+                    break
         return model.model_validate(json.loads(raw[start:end]))
     except Exception as e:
         raise ValueError(f"Failed to parse response as {model.__name__}: {e}\nRaw: {raw}")
