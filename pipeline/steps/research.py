@@ -1,6 +1,9 @@
 from pipeline.models import DecomposedQuestion, SubQuestionAnswer
 
 def research(decomposed: DecomposedQuestion, call_llm, parse_json) -> list[SubQuestionAnswer]:
+    """
+    Feeds the LLM the list of decomposed questions in order for research.
+    """
     answers = []
 
     for sub_question in decomposed.sub_questions:

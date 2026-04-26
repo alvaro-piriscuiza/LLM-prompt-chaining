@@ -1,6 +1,9 @@
 from pipeline.models import SubQuestionAnswer, FinalReport
 
 def synthesize(question: str, answers: list[SubQuestionAnswer], call_llm, parse_json) -> FinalReport:
+    """
+    Format answers as bullet list so that the LLM receives a compact, readable summary of all findings rather than a raw object representation.
+    """
     findings_text = "\n".join(
         f"- {a.sub_question}: {a.answer}" for a in answers
     )
