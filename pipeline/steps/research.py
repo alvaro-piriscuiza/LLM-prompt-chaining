@@ -11,7 +11,7 @@ def research(decomposed: DecomposedQuestion, call_llm, parse_json) -> list[SubQu
         
         Sub-question: {sub_question}
 
-        Respond with JSON only, no explanation:
+        Respond with JSON only, no explanation. The "answer" field must be a plain text string - not a list, not a nested object.
         {{
             "sub_question": "{sub_question}",
             "answer": "..."
